@@ -17,3 +17,24 @@ class myiterator:
         
 for i in myiterator(5):
    print(i)
+
+print("\n")
+class even_no():
+    def __iter__(self):
+        self.n = 2  
+        return self
+
+    def __next__(self):
+        x = self.n
+        self.n += 2  
+        return x
+
+even = even_no()
+it = iter(even)
+
+print(next(it))  
+print(next(it)) 
+print(next(it))  
+print(next(it)) 
+print(next(it))
+    
