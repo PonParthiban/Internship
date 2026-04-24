@@ -2,3 +2,19 @@ body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
 }
+
+nav {
+    background:#333;
+    padding:10px;
+    
+}
+nav a {
+    text-decoration: none;
+    margin-right:15px;
+    font-weight: bold;
+    color:white
+}
+
+nav a:hover {
+    color: yellow;
+}
