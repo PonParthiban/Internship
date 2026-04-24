@@ -50,7 +50,9 @@ class Video(Resource):
         db.session.add(video)
         db.session.commit()
 
-        return video, 201   
+        return video, 201  
+
+    @marshal_with(resource_fields) 
     def patch(self, vid_id):
         args = vid_put_args.parse_args()
         video = VideoModel.query.get(vid_id)
@@ -69,6 +71,7 @@ class Video(Resource):
 
         return video
     
+    @marshal_with(resource_fields)
     def update(self, vid_id):
         args = vid_put_args.parse_args()
         video = VideoModel.query.get(vid_id)
@@ -84,6 +87,7 @@ class Video(Resource):
 
         return video
     
+    @marshal_with(resource_fields)
     def delete(self, vid_id):
         video = VideoModel.query.get(vid_id)
 
