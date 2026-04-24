@@ -19,3 +19,13 @@ input()
 
 response = requests.get(BASE + "video/6")
 print("GET:", response.json())
+
+response = requests.patch(BASE + "video/0", json={"views": 150})
+print("PATCH:", response.json())
+
+input()
+
+response = requests.update(BASE + "video/2", json={"name": "FastAPI Tutorial Updated", "views": 350, "likes": 40})
+print("UPDATE:", response.json())
+
+

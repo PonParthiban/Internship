@@ -51,6 +51,39 @@ class Video(Resource):
         db.session.commit()
 
         return video, 201   
+    def patch(self, vid_id):
+        args = vid_put_args.parse_args()
+        video = VideoModel.query.get(vid_id)
+
+        if not video:
+            abort(404, message="Video not found")
+
+        if args["name"]:
+            video.name = args["name"]
+        if args["views"]:
+            video.views = args["views"]
+        if args["likes"]:
+            video.likes = args["likes"]
+
+        db.session.commit()
+
+        return video
+    
+    def update(self, vid_id):
+        args = vid_put_args.parse_args()
+        video = VideoModel.query.get(vid_id)
+
+        if not video:
+            abort(404, message="Video not found")
+
+        video.name = args["name"]
+        video.views = args["views"]
+        video.likes = args["likes"]
+
+        db.session.commit()
+
+        return video
+    
     def delete(self, vid_id):
         video = VideoModel.query.get(vid_id)
 
