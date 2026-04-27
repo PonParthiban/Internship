@@ -1,26 +1,36 @@
-from flask import Flask, request
+from flask import Flask
 from flask_restful import Api, Resource, reqparse, fields, marshal_with, abort
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 app = Flask(__name__)
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/videodb'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
 class VideoModel(db.Model):
-     id = db.Column(db.Integer, primary_key=True)
-     name = db.Column(db.String(100), nullable=False)
-     views = db.Column(db.Integer, nullable=False)
-     likes = db.Column(db.Integer, nullable=False)
-     
-     def __repr__(self):
-        return f"Video(name={self.name}, views={self.views}, likes={self.likes})"    
-     
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    views = db.Column(db.Integer, nullable=False)
+    likes = db.Column(db.Integer, nullable=False)
+    is_deleted = db.Column(db.Boolean, default=False)
+    deleted_at = db.Column(db.DateTime, nullable=True)
+
+def get_active_video(vid_id):
+    return VideoModel.query.filter_by(id=vid_id, is_deleted=False).first()
 
 vid_put_args = reqparse.RequestParser()
-vid_put_args.add_argument("name", type=str, help="name of the video",required=True)
-vid_put_args.add_argument("views", type=int, help="views of the video",required=True)
-vid_put_args.add_argument("likes", type=int, help="likes of the video",required=True)
+vid_put_args.add_argument("name", type=str, required=True)
+vid_put_args.add_argument("views", type=int, required=True)
+vid_put_args.add_argument("likes", type=int, required=True)
+
+vid_patch_args = reqparse.RequestParser()
+vid_patch_args.add_argument("name", type=str)
+vid_patch_args.add_argument("views", type=int)
+vid_patch_args.add_argument("likes", type=int)
 
 resource_fields = {
     "id": fields.Integer,
@@ -29,77 +39,137 @@ resource_fields = {
     "likes": fields.Integer
 }
 
+class Like(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    vid_id = db.Column(
+        db.Integer,
+        db.ForeignKey("Video.id"),
+        nullable = False
+    )
+    user_name = db.Column(db.String(100))
+
+class View(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    video_id = db.Column(
+        db.Integer,
+        db.ForeignKey('Video.id'),
+        nullable=False
+    )
+
+    viewed_at = db.Column(db.DateTime, default=db.func.now())
+
 class Video(Resource):
 
     @marshal_with(resource_fields)
     def get(self, vid_id):
-        video = VideoModel.query.filter_by(id=vid_id).first()
-
+        video = get_active_video(vid_id)
         if not video:
             abort(404, message="Video not found")
         return video
-    
+
+
     @marshal_with(resource_fields)
     def put(self, vid_id):
         args = vid_put_args.parse_args()
-        video = VideoModel(id=vid_id, name=args["name"], views=args["views"], likes=args["likes"])
+        existing = VideoModel.query.get(vid_id)
 
-        if VideoModel.query.get(vid_id):
+        # If exists and active → conflict
+        if existing and not existing.is_deleted:
             abort(409, message="Video already exists")
+
+        # If exists but soft deleted → restore + update
+        if existing and existing.is_deleted:
+            existing.name = args["name"]
+            existing.views = args["views"]
+            existing.likes = args["likes"]
+            existing.is_deleted = False
+            existing.deleted_at = None
+            db.session.commit()
+            return existing, 200
+
+        # Else create new
+        video = VideoModel(
+            id=vid_id,
+            name=args["name"],
+            views=args["views"],
+            likes=args["likes"]
+        )
 
         db.session.add(video)
         db.session.commit()
+        return video, 201
 
-        return video, 201  
 
-    @marshal_with(resource_fields) 
+    @marshal_with(resource_fields)
     def patch(self, vid_id):
-        args = vid_put_args.parse_args()
-        video = VideoModel.query.get(vid_id)
-
+        video = get_active_video(vid_id)
         if not video:
             abort(404, message="Video not found")
 
-        if args["name"]:
+        args = vid_patch_args.parse_args()
+
+        if args["name"] is not None:
             video.name = args["name"]
-        if args["views"]:
+        if args["views"] is not None:
             video.views = args["views"]
-        if args["likes"]:
+        if args["likes"] is not None:
             video.likes = args["likes"]
 
         db.session.commit()
+        return video, 200
 
-        return video
-    
-    @marshal_with(resource_fields)
-    def update(self, vid_id):
-        args = vid_put_args.parse_args()
-        video = VideoModel.query.get(vid_id)
 
+    def delete(self, vid_id):
+        video = get_active_video(vid_id)
         if not video:
             abort(404, message="Video not found")
 
-        video.name = args["name"]
-        video.views = args["views"]
-        video.likes = args["likes"]
+        video.is_deleted = True
+        video.deleted_at = datetime.utcnow()
 
         db.session.commit()
-
-        return video
+        return {"message": "Soft deleted successfully"}, 200
     
-    @marshal_with(resource_fields)
+    likes = db.relationship('Like', backref='video', lazy=True)
+    views = db.relationship('View', backref='video', lazy=True)
+
+class VideoHardDelete(Resource):
     def delete(self, vid_id):
         video = VideoModel.query.get(vid_id)
 
         if not video:
             abort(404, message="Video not found")
 
+        # Only allow hard delete if already soft deleted
+        if not video.is_deleted:
+            abort(400, message="Soft delete first before permanent deletion")
+
         db.session.delete(video)
         db.session.commit()
+        return {"message": "Permanently deleted"}, 200
 
-        return {"message": "Deleted successfully"}
-                
+class VideoRestore(Resource):
+    def patch(self, vid_id):
+        video = VideoModel.query.get(vid_id)
+
+        if not video:
+            abort(404, message="Video not found")
+
+        if not video.is_deleted:
+            abort(400, message="Video is not deleted")
+
+        video.is_deleted = False
+        video.deleted_at = None
+
+        db.session.commit()
+        return {"message": "Restored successfully"}, 200
+
+
 api.add_resource(Video, "/video/<int:vid_id>")
+api.add_resource(VideoHardDelete, "/video/<int:vid_id>/hard")
+api.add_resource(VideoRestore, "/video/<int:vid_id>/restore")
 
 
 if __name__ == "__main__":
