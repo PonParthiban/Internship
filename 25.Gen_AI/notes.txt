@@ -1,0 +1,3 @@
+Flask is a Python web framework used to build APIs.
+ChromaDB is a vector database used for semantic search.
+LLMs are used for text generation and understanding.
