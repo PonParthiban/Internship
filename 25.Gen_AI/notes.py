@@ -56,7 +56,6 @@ def search_notes(query):
 # 6. LLM setup
 # -------------------------
 client_llm = OpenAI()
-client_llm = OpenAI(api_key="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")
 def ask_llm(question, context_docs):
     context = "\n".join(context_docs)
 
