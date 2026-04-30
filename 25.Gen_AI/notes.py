@@ -61,7 +61,7 @@ while True:
     docs = search_notes(query)
 
     # debug: show retrieved docs
-    print("\n🔍 Retrieved context:")
+    print("\n Retrieved context:")
     for d in docs:
         print("-", d)
 
