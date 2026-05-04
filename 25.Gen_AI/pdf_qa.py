@@ -1,3 +1,4 @@
+#PDF → text → chunks → embeddings → Chroma → search → prompt → LLM
 from pypdf import PdfReader
 import chromadb
 import requests

@@ -8,7 +8,7 @@ prompt = ChatPromptTemplate.from_messages([
 
 llm = ChatOllama(model="llama3")
 
-chain = prompt | llm
+chain = prompt | llm #Prompt → LLM → Output
 
 response = chain.invoke({"topic": "machine learning"})
 print(response.content)
