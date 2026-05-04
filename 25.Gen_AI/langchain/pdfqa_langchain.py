@@ -5,6 +5,8 @@ from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 #Load PDF
 loader = PyPDFLoader("file.pdf")
@@ -27,31 +29,45 @@ db = Chroma.from_documents(chunks, embeddings)
 retriever = db.as_retriever(search_kwargs={"k": 3})
 
 #Prompt
-prompt = ChatPromptTemplate.from_template(
-    """You are a helpful assistant.
+prompt = ChatPromptTemplate.from_messages([
+    ("system", """You are a helpful assistant.
 
 Rules:
-- Answer ONLY using the context
+- Answer ONLY from the context
 - If answer not found, say "I don't know"
-- Keep answer short and clear
-
-Context:
-{context}
-
-Question:
-{question}
-"""
-)
+- Be concise and accurate
+"""),
+    ("placeholder", "{history}"),
+    ("human", "Context:\n{context}\n\nQuestion: {question}")
+])
 
 #Model
 llm = ChatOllama(model="phi3")
 
 #Chain (THIS replaces your whole logic)
 chain = (
-    {"context": retriever, "question": lambda x: x}
+    {
+        "context": lambda x: retriever.invoke(x["question"]),
+        "question": lambda x: x["question"]
+    }
     | prompt
     | llm
     | StrOutputParser()
+)
+
+#memory
+store = {}
+
+def get_session_history(session_id: str):
+    if session_id not in store:
+        store[session_id] = InMemoryChatMessageHistory()
+    return store[session_id]
+
+chain_with_memory = RunnableWithMessageHistory(
+    chain,
+    get_session_history,
+    input_messages_key="question",
+    history_messages_key="history",
 )
 
 #Chat loop
@@ -63,7 +79,10 @@ while True:
         break
 
     try:
-        answer = chain.invoke(query)
+        answer = chain_with_memory.invoke(
+    {"question": query},
+    config={"configurable": {"session_id": "user1"}}
+     )
         print("\nAnswer:", answer)
     except Exception as e:
         print("\nError:", e)
