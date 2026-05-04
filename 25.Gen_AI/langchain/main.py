@@ -1,5 +1,14 @@
-from langchain_ollama import OllamaLLM
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama import ChatOllama
 
-llm = OllamaLLM(model="llama3")
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful teacher"),
+    ("human", "Explain {topic} in simple terms")
+])
 
-print(llm.invoke("hi"))
+llm = ChatOllama(model="llama3")
+
+chain = prompt | llm
+
+response = chain.invoke({"topic": "machine learning"})
+print(response.content)
