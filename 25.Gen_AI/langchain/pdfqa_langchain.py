@@ -44,7 +44,7 @@ Rules:
 #Model
 llm = ChatOllama(model="phi3")
 
-#Chain (THIS replaces your whole logic)
+#Chain 
 chain = (
     {
         "context": lambda x: retriever.invoke(x["question"]),
