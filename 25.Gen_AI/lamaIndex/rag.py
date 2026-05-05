@@ -4,6 +4,8 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 from llama_index.core import Settings
 
+
+
 # Step 1 — Configure models globally
 Settings.llm = Ollama(model="phi3")
 Settings.embed_model = OllamaEmbedding(model="nomic-embed-text")
@@ -25,6 +27,8 @@ query_engine = index.as_query_engine(
     similarity_top_k=3,
     response_mode="compact"
 )
+
+
 
 # Step 6 — Chat loop
 while True:
