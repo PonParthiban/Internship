@@ -1,42 +1,82 @@
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings
 from llama_index.core.node_parser import SemanticSplitterNodeParser
-from llama_index.embeddings.ollama import OllamaEmbedding
-from llama_index.llms.ollama import Ollama
-from llama_index.core import Settings
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 
+# ============================================
+# STEP 1 — Configure HuggingFace
+# ============================================
+HF_TOKEN = "hhf_SKQYaidaFtFtFJAguJoeGIpMLURFAWVpsT"
+MODEL_ID  = "mistralai/Mistral-7B-Instruct-v0.3"  # Free, no approval needed
 
+# LLM — HuggingFace Inference API
+Settings.llm = HuggingFaceInferenceAPI(
+    model_name=MODEL_ID,
+    token=HF_TOKEN,
+    max_new_tokens=512,
+    temperature=0.7,
+)
 
-# Step 1 — Configure models globally
-Settings.llm = Ollama(model="phi3")
-Settings.embed_model = OllamaEmbedding(model="nomic-embed-text")
+# Embedding — runs locally for free
+Settings.embed_model = HuggingFaceEmbedding(
+    model_name="all-MiniLM-L6-v2"
+)
 
-# Step 2 — Load documents
+# ============================================
+# STEP 2 — Load Documents
+# ============================================
 docs = SimpleDirectoryReader("./data").load_data()
+print(f"Loaded {len(docs)} documents")
 
-# Step 3 — Smart chunking
+# ============================================
+# STEP 3 — Smart Semantic Chunking
+# ============================================
 parser = SemanticSplitterNodeParser(
-    embed_model=Settings.embed_model
+    embed_model=Settings.embed_model,       # ✅ Now properly set
+    breakpoint_percentile_threshold=95
 )
 nodes = parser.get_nodes_from_documents(docs)
+print(f"Created {len(nodes)} chunks")
 
-# Step 4 — Build index
+# ============================================
+# STEP 4 — Build Vector Index
+# ============================================
 index = VectorStoreIndex(nodes)
+print("Index built successfully")
 
-# Step 5 — Query engine
+# ============================================
+# STEP 5 — Query Engine
+# ============================================
 query_engine = index.as_query_engine(
     similarity_top_k=3,
     response_mode="compact"
 )
 
+# ============================================
+# STEP 6 — Chat Loop
+# ============================================
+print("\nRAG ready! Ask questions about your documents.")
+print("Type 'exit' to quit\n")
 
-
-# Step 6 — Chat loop
 while True:
-    question = input("\nAsk: ")
-    if question == "exit":
+    question = input("\nAsk: ").strip()
+
+    if not question:
+        continue
+
+    if question.lower() == "exit":
+        print("Goodbye!")
         break
-    response = query_engine.query(question)
-    print("\nAnswer:", response)
-    print("\nSources:")
-    for node in response.source_nodes:
-        print(f"  - {node.metadata['file_name']} (score: {node.score:.2f})")
+
+    try:
+        response = query_engine.query(question)
+        print("\nAnswer:", response)
+
+        print("\nSources:")
+        for node in response.source_nodes:
+            file_name = node.metadata.get('file_name', 'Unknown')
+            score = node.score if node.score else 0.0
+            print(f"  - {file_name} (score: {score:.2f})")
+
+    except Exception as e:
+        print(f"\nError: {e}")
