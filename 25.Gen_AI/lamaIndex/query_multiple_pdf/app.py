@@ -4,7 +4,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 
 # STEP 1 — Configure HuggingFace
-HF_TOKEN = "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"
+HF_TOKEN = "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"
 MODEL_ID  = "meta-llama/Llama-3.1-8B-Instruct"  
 
 # LLM — HuggingFace Inference API
