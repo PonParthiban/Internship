@@ -21,8 +21,10 @@ Settings.embed_model = HuggingFaceEmbedding(
 )
 
 # STEP 2 — Load Documents
-docs = SimpleDirectoryReader("./data").load_data()
-print(f"Loaded {len(docs)} documents")
+docs = SimpleDirectoryReader(
+    input_dir="./data",
+    required_exts=[".pdf"] 
+).load_data()
 
 # STEP 3 — Smart Semantic Chunking
 parser = SemanticSplitterNodeParser(
