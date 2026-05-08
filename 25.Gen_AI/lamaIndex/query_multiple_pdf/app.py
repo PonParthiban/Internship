@@ -8,7 +8,6 @@ from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from dotenv import load_dotenv
 import os
 
-
 # STEP 1 — Configure HuggingFace
 load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
@@ -75,7 +74,7 @@ query_engine = index.as_query_engine(
     text_qa_template=qa_prompt_template 
 )
 
-# STEP 7 — LOGGING SETUP (Silent - No Printing)
+# STEP 7 — LOGGING SETUP
 class RAGLogger:
     """Logs all RAG interactions silently"""
     
@@ -105,7 +104,7 @@ class RAGLogger:
         }
         
         self.logs.append(log_entry)
-        self.save_logs()  # Save silently
+        self.save_logs()  
     
     def save_logs(self):
         """Save logs to JSON file (no print)"""
@@ -115,7 +114,7 @@ class RAGLogger:
 # Initialize logger
 logger = RAGLogger("rag_logs.json")
 
-# STEP 8 — Chat Loop (Only prints answer and sources, not logs)
+# STEP 8 — Chat Loop 
 print("\nRAG ready! Ask questions about your documents.")
 print("Type 'exit' to quit\n")
 
@@ -133,7 +132,7 @@ while True:
         # Query the RAG system
         response = query_engine.query(question)
         
-        # Log silently (no print)
+        # Log 
         logger.log_query(
             question=question,
             retrieved_chunks=response.source_nodes,
@@ -153,7 +152,6 @@ while True:
     except Exception as e:
         print(f"\nError: {e}")
         
-        # Log errors silently too
         error_log = {
             "timestamp": datetime.now().isoformat(),
             "query": question,
