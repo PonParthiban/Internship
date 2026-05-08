@@ -1,5 +1,6 @@
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings
 from llama_index.core.node_parser import SemanticSplitterNodeParser
+from llama_index.core.prompts import PromptTemplate
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 
@@ -7,7 +8,6 @@ from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 HF_TOKEN = "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"
 MODEL_ID  = "meta-llama/Llama-3.1-8B-Instruct"  
 
-# LLM — HuggingFace Inference API
 Settings.llm = HuggingFaceInferenceAPI(
     model_name=MODEL_ID,
     token=HF_TOKEN,
@@ -15,7 +15,6 @@ Settings.llm = HuggingFaceInferenceAPI(
     temperature=0.7,
 )
 
-# Embedding — runs locally for free
 Settings.embed_model = HuggingFaceEmbedding(
     model_name="all-MiniLM-L6-v2"
 )
@@ -38,14 +37,30 @@ print(f"Created {len(nodes)} chunks")
 index = VectorStoreIndex(nodes)
 print("Index built successfully")
 
+# STEP 5 — CREATE CUSTOM PROMPT ✅
+qa_prompt_template = PromptTemplate("""
+You are a helpful AI assistant answering questions based on documents.
 
-# STEP 5 — Query Engine
+Context information is below:
+---------------------
+{context_str}
+---------------------
+
+Based ONLY on the context above, answer the following question:
+{query_str}
+
+If the answer is not in the context, say "I don't know" instead of making up information.
+Provide a clear and concise answer.
+""")
+
+# STEP 6 — Query Engine with Custom Prompt
 query_engine = index.as_query_engine(
     similarity_top_k=3,
-    response_mode="compact"
+    response_mode="compact",
+    text_qa_template=qa_prompt_template  # ← add custom prompt here
 )
 
-# STEP 6 — Chat Loop
+# STEP 7 — Chat Loop
 print("\nRAG ready! Ask questions about your documents.")
 print("Type 'exit' to quit\n")
 

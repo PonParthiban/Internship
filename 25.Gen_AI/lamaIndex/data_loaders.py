@@ -1,22 +1,19 @@
-from llama_index.core import SimpleDirectoryReader
-from llama_index.readers.web import SimpleWebPageReader
-from llama_index.readers.youtube import YoutubeTranscriptReader
-from llama_index.readers.notion import NotionPageReader
-from llama_index.readers.database import DatabaseReader
+from llama_index.core.agent import ReActAgent
+from llama_index.core.memory import ChatMemoryBuffer
 
-# Load entire folder
-docs = SimpleDirectoryReader("./data").load_data()
-# loads PDFs, Word, txt, CSV, images automatically
-
-# Load website
-docs = SimpleWebPageReader().load_data(["https://example.com"])
-
-# Load YouTube
-docs = YoutubeTranscriptReader().load_data(
-    ytlinks=["https://youtube.com/watch?v=xxx"]
+# Create memory system
+memory = ChatMemoryBuffer.from_defaults(token_limit=3000)
+# Create agent with memory
+agent = ReActAgent.from_tools(
+    tools=[vector_tool, summary_tool],
+    memory=memory,
+    verbose=True,
+    system_prompt="""
+    You are a helpful assistant with access to company documents.
+    Remember context from previous conversations.
+    Break down complex questions into steps.
+    """
 )
-
-# Load database
-docs = DatabaseReader(
-    sql_database=db
-).load_data(query="SELECT * FROM products")
+# Multi-turn conversation
+response1 = agent.chat("What are our main products?")
+response2 = agent.chat("How do they compare to competitors?")
