@@ -1,0 +1,7 @@
+[
+  {
+    "timestamp": "2026-05-08T13:54:02.299405",
+    "query": "what is llm",
+    "error": "(Request ID: Root=1-69fd9da1-08441c962d63243d71b25c91;fac3382a-84c0-4ff0-8fcc-9173652ccaed)\n\n429 Too Many Requests for url: https://router.huggingface.co/v1/chat/completions."
+  }
+]
