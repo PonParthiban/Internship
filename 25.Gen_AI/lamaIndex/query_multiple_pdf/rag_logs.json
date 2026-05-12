@@ -1,7 +1,80 @@
 [
   {
-    "timestamp": "2026-05-08T13:54:02.299405",
+    "timestamp": "2026-05-12T09:33:08.496219",
     "query": "what is llm",
-    "error": "(Request ID: Root=1-69fd9da1-08441c962d63243d71b25c91;fac3382a-84c0-4ff0-8fcc-9173652ccaed)\n\n429 Too Many Requests for url: https://router.huggingface.co/v1/chat/completions."
+    "retrieved_information": {
+      "total_chunks": 3,
+      "chunks": [
+        {
+          "file": "gen_ai.pdf",
+          "content": "LANGCHAIN:\nLangChain = a toolkit to build apps using LLMs\nit helps you connect everything together:\nLLM (like Gemini or GPT)\nyour data (PDF, DB, files)\nlogic (prompts, steps, memory)\nInput → Prompt → ...",
+          "similarity_score": 0.3964728056755376
+        },
+        {
+          "file": "file.pdf",
+          "content": "Augmentation\n3. Generation\nChunking:\nsize + overlap\nFine-tuning:\ncustomize model for specific tasks\nMCP server:\nconnects LLM with tools and APIs\n",
+          "similarity_score": 0.2708715719557143
+        },
+        {
+          "file": "gen_ai.pdf",
+          "content": "LM -> Language Model\n=> understands and predict text\ntypes of lm\n-> traditional lm\n-> neural lm\nLLM -> large language model\nLLM = predicts next word → repeatedly → forms intelligent output\nfoundation ...",
+          "similarity_score": 0.2355266053940249
+        }
+      ]
+    },
+    "model_response": "LLM stands for Large Language Model.",
+    "response_length": 36
+  },
+  {
+    "timestamp": "2026-05-12T09:33:26.611550",
+    "query": "what is restapi",
+    "retrieved_information": {
+      "total_chunks": 3,
+      "chunks": [
+        {
+          "file": "restapi_doc.pdf",
+          "content": "Conclusion\nThis project demonstrates:\n• REST API design \n• Foreign key relationships \n• Data normalization \n• Soft delete strategy \n• It follows industry-level backend design principles.",
+          "similarity_score": 0.5431815728114413
+        },
+        {
+          "file": "restapi_doc.pdf",
+          "content": "REST API PROJECT DOCUMENTATION\n1. Introduction\nThis project is a REST API built using Flask and SQLAlchemy to manage videos and track user \ninteractions such as likes and views.\nThe system follows pro...",
+          "similarity_score": 0.43252558417291137
+        },
+        {
+          "file": "restapi_doc.pdf",
+          "content": "Soft Delete:  DELETE /video/<id>\n200 OK\n{\n    \"message\": \"Soft deleted\"\n}\nB .Like API:\nAdd Like:  POST /video/<id>/like\nbody:\n{\n  \"user_name\": \"parthi\"\n}\n200 OK\n{\n    \"message\": \"Liked\"\n}\n200 OK\n{\n   ...",
+          "similarity_score": 0.3676385619065755
+        }
+      ]
+    },
+    "model_response": "I don't know.",
+    "response_length": 13
+  },
+  {
+    "timestamp": "2026-05-12T09:33:41.114650",
+    "query": "what is REST API",
+    "retrieved_information": {
+      "total_chunks": 3,
+      "chunks": [
+        {
+          "file": "restapi_doc.pdf",
+          "content": "Conclusion\nThis project demonstrates:\n• REST API design \n• Foreign key relationships \n• Data normalization \n• Soft delete strategy \n• It follows industry-level backend design principles.",
+          "similarity_score": 0.553804692770129
+        },
+        {
+          "file": "restapi_doc.pdf",
+          "content": "REST API PROJECT DOCUMENTATION\n1. Introduction\nThis project is a REST API built using Flask and SQLAlchemy to manage videos and track user \ninteractions such as likes and views.\nThe system follows pro...",
+          "similarity_score": 0.5328660698250832
+        },
+        {
+          "file": "restapi_doc.pdf",
+          "content": "Soft Delete:  DELETE /video/<id>\n200 OK\n{\n    \"message\": \"Soft deleted\"\n}\nB .Like API:\nAdd Like:  POST /video/<id>/like\nbody:\n{\n  \"user_name\": \"parthi\"\n}\n200 OK\n{\n    \"message\": \"Liked\"\n}\n200 OK\n{\n   ...",
+          "similarity_score": 0.3896192318650166
+        }
+      ]
+    },
+    "model_response": "I don't know. \n\nHowever, I can tell you that the provided context is a document about a REST API project, but the definition of REST API itself is not explicitly mentioned.",
+    "response_length": 172
   }
 ]

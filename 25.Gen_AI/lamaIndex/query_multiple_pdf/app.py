@@ -24,14 +24,14 @@ Settings.llm = HuggingFaceInferenceAPI(
     temperature=0.7,
 )
 
-"""Settings.embed_model = HuggingFaceEmbedding(
-    model_name="all-MiniLM-L6-v2"
-)"""
-
 Settings.embed_model = HuggingFaceEmbedding(
-    model_name="all-mpnet-base-v2"  # stronger
+    model_name="all-MiniLM-L6-v2"
 )
 
+"""Settings.embed_model = HuggingFaceEmbedding(
+    model_name="all-mpnet-base-v2"  # stronger
+)
+"""
 
 # STEP 2 — Load Documents
 docs = SimpleDirectoryReader(
