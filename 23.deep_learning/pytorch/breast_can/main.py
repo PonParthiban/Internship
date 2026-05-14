@@ -2,6 +2,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import DataLoader
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -43,9 +44,15 @@ X_test = torch.tensor(X_test, dtype=torch.float32)
 y_train = torch.tensor(y_train.values, dtype=torch.float32).view(-1,1)
 y_test = torch.tensor(y_test.values, dtype=torch.float32).view(-1,1)
 
+tensor_data = DataLoader(
+              X_train,y_train,
+              batch_size=32,
+              suffle=True
+)
+
 # Neural Network
 class CancerNN(nn.Module):
-
+ 
     def __init__(self):
         super().__init__()
 
