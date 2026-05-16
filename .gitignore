@@ -30,3 +30,5 @@ CIFAR10/
 cats vs Dogs
 
 23.deep_learning/CNN/CIFAR10/data/
+data/
+*.tar.gz
