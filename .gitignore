@@ -25,3 +25,5 @@ venv/
 *.db
 chroma/
 
+CIFAR10/
+
